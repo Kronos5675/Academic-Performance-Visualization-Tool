@@ -1,81 +1,60 @@
 #!/bin/bash
 
-input_pdf="$1"
+file="$1"
 
-# Check file validity
-if [ -z "$input_pdf" ] || [ ! -f "$input_pdf" ]; then
-  echo "Usage: $0 <PDF File>"
-  exit 1
-fi
+# Extract the entire text from PDF
+text=$(pdftotext "$file" -)
 
-# Extract name and GPA
-text=$(pdftotext -layout "$input_pdf" -)
-student_name=$(echo "$text" | grep -i "NAME" | head -n 1 | sed -E 's/.*NAME[[:space:]]*:[[:space:]]*(.*)/\1/' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+# Extract name, PRN, seat number, and GPA
+name=$(echo "$text" | grep -oP 'NAME\s+: \K.*')
 prn=$(echo "$text" | grep -oP 'PRN: \K\d+')
 seat_no=$(echo "$text" | grep -oP 'SEAT NO. : \K\d+')
-gpa=$(echo "$text" | grep -i "GPA" | head -n 1 | sed -E 's/.*GPA[:[:space:]]*([0-9.]+).*/\1/')
+gpa=$(echo "$text" | grep -oP 'GPA: \K[\d.]+')
 
-# Fallbacks
-student_name_clean=$(echo "$student_name" | tr -cd '[:alnum:]_')
-[ -z "$student_name_clean" ] && student_name_clean="Unknown_Student"
+# Extract grade lines from between COURSE and RESULT DATE
+grades=$(echo "$text" | awk '/COURSE/,/RESULT DATE/' | grep -E '[0-9]{4}' | \
+  sed 's/^[[:space:]]*//; s/[[:space:]]\{2,\}/ /g' | \
+  while read -r line; do
+    code=$(echo "$line" | awk '{print $1}')
+    rest=$(echo "$line" | cut -d' ' -f2-)
 
-# Convert to text
-pdftotext -layout "$input_pdf" results.txt
+    # Split line into array
+    parts=($rest)
+    n=${#parts[@]}
 
-# Start JSON
-echo "{" 
-echo "  \"name\": \"${student_name}\","
-echo "  \"prn\": \"${prn}\","
-echo "  \"seat_no\": \"${seat_no}\","
-echo "  \"gpa\": $gpa,"
-echo "  \"grades\": ["
+    final=""
+    practical=""
+    ese=""
+    ca=""
+    subject_parts=()
 
-awk '
-BEGIN { first = 1 }
-/^[[:space:]]*[0-9]{4}/ {
-    if (!first) print ","
-    first = 0
+    if [[ $n -ge 1 ]]; then final="${parts[$((n-1))]}"; fi
+    if [[ $n -ge 2 ]]; then practical="${parts[$((n-2))]}"; fi
+    if [[ $n -ge 3 ]]; then ese="${parts[$((n-3))]}"; fi
+    if [[ $n -ge 4 ]]; then ca="${parts[$((n-4))]}"; fi
 
-    code = $1
-    subject = ""
-    ca = ""
-    ese = ""
-    practical = ""
-    final = ""
+    subject_len=$((n-4))
+    if [[ $subject_len -gt 0 ]]; then
+      subject_parts=("${parts[@]:0:$subject_len}")
+    fi
+    subject="${subject_parts[*]}"
 
-    # Extract subject name
-    for (i = 2; i <= NF; i++) {
-        if ($i ~ /^(A\+?|B\+?|C\+?|O|P|F|D)$/) break
-        subject = subject " " $i
-    }
-    subject = substr(subject, 2)
+    echo "{ \"subject\": \"${subject}\", \"ca_grade\": \"${ca}\", \"ese_grade\": \"${ese}\", \"practical_grade\": \"${practical}\", \"final_grade\": \"${final}\" },"
+  done
+)
 
-    n_grades = 0
-    for (j = i; j <= NF; j++) {
-        grades[n_grades++] = $j
-    }
-
-    if (n_grades == 4) {
-        ca = grades[0]
-        ese = grades[1]
-        practical = grades[2]
-        final = grades[3]
-    } else if (n_grades == 3) {
-        ca = grades[0]
-        ese = grades[1]
-        final = grades[2]
-    } else if (n_grades == 2) {
-        practical = grades[0]
-        final = grades[1]
-    } else if (n_grades == 1) {
-        final = grades[0]
-    }
-
-    printf "    { \"subject\": \"%s\", \"ca_grade\": \"%s\", \"ese_grade\": \"%s\", \"practical_grade\": \"%s\", \"final_grade\": \"%s\" }", subject, ca, ese, practical, final
-    delete grades
+# Combine into a single JSON object
+student_json=$(cat <<EOF
+{
+  "name": "$name",
+  "prn": "$prn",
+  "seat_no": "$seat_no",
+  "gpa": $gpa,
+  "grades": [
+$(echo "$grades" | sed '$ s/,$//')
+  ]
 }
-' results.txt
+EOF
+)
 
-echo ""
-echo "  ]"
-echo "}"
+echo "$student_json"
