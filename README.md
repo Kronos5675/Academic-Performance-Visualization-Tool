@@ -5,8 +5,7 @@ The **Academic Performance Visualization Tool** is a Python and Bash-based tool 
 
 ## Project Structure
 - **`extract_grades.sh`**: Shell script to extract individual student grade data from a PDF and format it into JSON.
-- **`combine_json.sh`**: Combines multiple student JSON outputs into one `combined_results.json` file.
-- **`analyze_visualize.py`**: Python script that processes and visualizes the data using Plotly.
+- **`main.py`**: Python script that processes and visualizes the data.
 - **`process_batch.sh`**: Processes multiple PDFs in a batch and generates a combined results JSON file.
 
 ## Features
@@ -31,8 +30,6 @@ The **Academic Performance Visualization Tool** is a Python and Bash-based tool 
   - `gnupg`
   - `python-dotenv`
   - `jq` (optional, for prettifying JSON)
-
-Install the necessary Python dependencies with:
 
 ##  How to Use
 
