@@ -1,14 +1,34 @@
 import json
+import os
+import gnupg
+from dotenv import load_dotenv
 import pandas as pd
 import plotly.express as px
 
+# ---------- Load Environment Variables ----------
+load_dotenv()
+gpg_password = os.getenv("GPG_PASSWORD")
+
+if not gpg_password:
+    print("❌ Error: GPG_PASSWORD not set in .env!")
+    exit(1)
+
+# ---------- Decrypt the GPG Encrypted JSON ----------
+gpg = gnupg.GPG()
+
+with open("combined_results.json.gpg", "rb") as encrypted_file:
+    decrypted_data = gpg.decrypt_file(encrypted_file, passphrase=gpg_password)
+
+if not decrypted_data.ok:
+    print("❌ GPG Decryption failed:", decrypted_data.status)
+    exit(1)
+
 # ---------- Load JSON ----------
-with open("combined_results.json", "r") as f:
-    content = f.read().strip()
-    if not content:
-        print("Error: combined_results.json is empty!")
-        exit(1)
-    raw_data = json.loads(content)
+try:
+    raw_data = json.loads(str(decrypted_data))
+except json.JSONDecodeError as e:
+    print("❌ JSON decode failed:", e)
+    exit(1)
 
 # ---------- Grade to Numeric Mapping ----------
 grade_to_num = {
