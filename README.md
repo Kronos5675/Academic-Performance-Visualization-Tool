@@ -34,8 +34,6 @@ The **Academic Performance Visualization Tool** is a Python and Bash-based tool 
 
 Install the necessary Python dependencies with:
 
-```bash
-pip install pandas plotly gnupg python-dotenv
 ##  How to Use
 
 ### Extract Grades from Individual PDFs
@@ -56,7 +54,7 @@ bash
 
 ---
 
-### Visualize the Results
+###  Visualize the Results
 Run the Python script to analyze and visualize the data:
 
 bash
@@ -72,6 +70,7 @@ GPG_PASSWORD=your_passphrase
 ---
 
 ##  Visualizations
+
 - **Average Grade Comparison per Subject**  
   Displays a bar chart showing the average final grade across all subjects.
 
@@ -87,12 +86,13 @@ GPG_PASSWORD=your_passphrase
 ---
 
 ##  Dependencies
+
 ###  Shell Scripts:
 - `pdftotext` – For converting PDF content to plain text  
 - `jq` *(optional)* – For formatting JSON output  
 - `GPG` – For encrypting/decrypting JSON data
 
-###  Python Libraries:
+### Python Libraries:
 - `pandas` – Data processing and manipulation  
 - `plotly` – Interactive visualizations  
 - `gnupg` – GPG decryption of result files  
@@ -130,4 +130,6 @@ This project is licensed under the [MIT License](LICENSE).
 - **Soham** – Repo setup, data security, PR management  
 - **Veer** – Scripting, automation, issue resolution  
 - **Yasaswini** – Documentation, debugging, data accuracy  
-- **Samriddhi** – Visualization, accessibility, script enhancements 
+- **Samriddhi** – Visualization, accessibility, script enhancements  
+
+
