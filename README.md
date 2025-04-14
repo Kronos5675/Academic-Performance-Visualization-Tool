@@ -53,13 +53,6 @@ bash
 
 ###  Visualize the Results
 Run the Python script to analyze and visualize the data:
-
-bash
-python analyze_visualize.py
-
-
-Ensure that `combined_results.json` (or the encrypted `combined_results.json.gpg`) is present in the script directory. If encrypted, make sure your `.env` file contains:
-
 env
 GPG_PASSWORD=your_passphrase
 
