@@ -29,6 +29,8 @@ The **Academic Performance Visualization Tool** is a Python and Bash-based tool 
   - `plotly`
   - `gnupg`
   - `python-dotenv`
+  - `os`
+  - `json`
   - `jq` (optional, for prettifying JSON)
 
 ##  How to Use
