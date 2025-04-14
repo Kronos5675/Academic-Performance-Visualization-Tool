@@ -36,26 +36,32 @@ The **Academic Performance Visualization Tool** is a Python and Bash-based tool 
 ### Extract Grades from Individual PDFs
 Use the following command to extract grades from a student’s PDF and output the result to a JSON file:
 
-bash
+```bash
 ./extract_grades.sh path/to/student.pdf > student.json
-
+```
 
 ---
 
 ### Combine All Student JSONs into One File
 You can process multiple student PDFs from a folder and combine them into a single `combined_results.json` file:
 
-bash
-./combine_json.sh path/to/pdf_folder
-
-
+```bash
+./process_batch.sh ./{"path_to_results folder"}.
+```
 ---
 
 ###  Visualize the Results
 Run the Python script to analyze and visualize the data:
-env
-GPG_PASSWORD=your_passphrase
 
+```bash
+python main.py
+```
+
+Ensure that `combined_results.json` (or the encrypted `combined_results.json.gpg`) is present in the script directory. If encrypted, make sure your `.env` file contains:
+
+```env
+GPG_PASSWORD=your_passphrase
+```
 
 ---
 
